@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "aiofauna-llm"
-version = "0.0.4"
-description = ""
-authors = ["Your Name <you@example.com>"]
+name = "aio-agents"
+version = "0.0.1"
+description = "Opinionated template for building llm agents"
+authors = ["Oscar Bahamonde <oscar.bahamonde@pucp.edu.pe>"]
 readme = "README.md"
-packages = [{ include = "aiofauna_llm", from = "." }]
+packages = [{ include = "aio_agents", from = "." }]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
@@ -24,6 +24,11 @@ spacy = "^3.6.1"
 uvicorn = "^0.23.2"
 scipy = "^1.11.2"
 pydub = "^0.25.1"
+pandas = "^2.0.3"
+celery = "^5.3.1"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.5.1"
 
 [build-system]
 requires = ["poetry-core"]
