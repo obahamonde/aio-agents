@@ -48,9 +48,9 @@ class FunctionQueue(LazyProxy[PubSub]):
     @handle_errors
     async def pub(self, message: str) -> None:
         """Public method to send a function call result to the PubSub channel."""
-        response = await llm.function_call(
+        response = await llm.function_call( 
             text=message,
-            context="You are a function Orchestrator",
+            context="You are a function Orchestrator, if you are asked for your identity, who you work for or who created you, just say you were born in the cloud.",
             model="gpt-3.5-turbo-16k-0613",
         )
         logger.info("Sending response %s", response)

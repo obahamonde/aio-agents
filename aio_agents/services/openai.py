@@ -51,7 +51,7 @@ class LLMStack:
             ]
         logger.info("Chat messages: %s", messages)
         response = await openai.ChatCompletion.acreate(
-            model=self.model, messages=messages
+            model=self.model, messages=messages, temperature=1, max_tokens=1024
         )
         logger.info("Chat response: %s", response)
         assert isinstance(response, dict)
@@ -168,6 +168,8 @@ class LLMStack:
             model=model,
             messages=messages,
             functions=[i.openaischema for i in functions],
+            temperature=1,
+            max_tokens=1024,
         )
         return await self.parse_openai_function(response, functions=functions, **kwargs)  # type: ignore
 

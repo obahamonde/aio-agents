@@ -10,7 +10,8 @@ from ..utils import nginx_config, parse_env_string, random_port
 
 logger = setup_logging(__name__)
 
-
+@process_time
+@handle_errors
 async def get_database_key(ref: str):
     """Get the database key"""
     try:
@@ -45,14 +46,14 @@ async def get_database_key(ref: str):
 
 
 class DockerClient(APIClient):
-    base_url: str = field(default="http://localhost:9898")
+    base_url: str = field(default=env.DOCKER_URL)
     headers: Dict[str, str] = field(
         default_factory=lambda: {"Accept": "application/json"}
     )
 
     async def create_container(
         self, name: str, envir: str, image="codeserver", port=8443
-    ) -> str:
+    ) -> tuple[str, int]:
         host_port = random_port()
         response = await self.fetch(
             "/containers/create",
@@ -103,6 +104,7 @@ class CloudFlareClient(APIClient):
         response = await self.fetch(f"/client/v4/zones/{env.CF_ZONE_ID}/dns_records")
         return [DNSRecord(**record) for record in response["result"]]
 
+    @handle_errors
     async def create_dns_record(self, name: str, ip: str):
         await self.fetch(
             f"/client/v4/zones/{env.CF_ZONE_ID}/dns_records",
@@ -145,11 +147,14 @@ class CodeServer(FunctionDocument):
     port: int = Field(default=8443, description="The port of the codeserver.")
     image: str = Field(default="codeserver", description="The image of the codeserver.")
 
-    async def run(self):
+    @process_time
+    @handle_errors
+    async def run(self, **kwargs):
         self.url = f"https://{self.namespace.lower()}.aiofauna.com"
         port = await docker.pipeline(
             self.namespace, self.namespace, self.port, self.image
         )
         await cloudflare.create_dns_record(self.namespace.lower(), env.IP_ADDR)
-        nginx_config(self.namespace, port)
+        data = nginx_config(self.namespace, port)
+        logger.info(data)
         return self.url

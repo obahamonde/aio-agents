@@ -56,6 +56,7 @@ class Env(BaseSettings):
     AWS_S3_BUCKET: str = Data(..., env="AWS_S3_BUCKET")
     AWS_LAMBDA_ROLE: str = Data(..., env="AWS_LAMBDA_ROLE")
     AWS_ECR_URL: str = Data(..., env="AWS_ECR_URL")
+    AWS_SES_EMAIL: str = Data(..., env="AWS_SES_EMAIL")
     GH_CLIENT_ID: str = Data(..., env="GH_CLIENT_ID")
     GH_CLIENT_SECRET: str = Data(..., env="GH_CLIENT_SECRET")
     CF_API_KEY: str = Data(..., env="CF_API_KEY")
@@ -64,6 +65,9 @@ class Env(BaseSettings):
     CF_ACCOUNT_ID: str = Data(..., env="CF_ACCOUNT_ID")
     IP_ADDR: str = Data(..., env="IP_ADDR")
     REDIS_URL: str = Data(..., env="REDIS_URL")
+    DOCKER_URL: str = Data(..., env="DOCKER_URL")
+    PAYPAL_CLIENT_ID: str = Data(..., env="PAYPAL_CLIENT_ID")
+    PAYPAL_SECRET_KEY: str = Data(..., env="PAYPAL_SECRET_KEY")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -6,7 +6,38 @@ from ..services import *
 
 logger = setup_logging(__name__)
 
+class ConversationMessage(BaseModel):
+    """A full conversation message"""
+    user:Optional[User] = Field(default=None)
+    content: str = Field(...)
 
+class Conversation(Document):
+    """A conversation"""
+    namespace:str = Field(...)
+    title:Optional[str] = Field(default=None)
+    participants:Optional[List[User]] = Field(default=[])
+    messages:Optional[List[ConversationMessage]] = Field(default=[])
+
+    async def fetch(self):
+        """Fetches all the nested ids full information"""
+        namespace = await Namespace.get(self.namespace)
+        messages = await ChatMessage.find_many(namespace=self.namespace)
+        messages_with_users = []
+        for message in messages:
+            user = await User.get(message.owner) if message.owner != "agent" else User(name="Agent", sub="agent", picture="/logo.png")  # type:ignore
+            messages_with_users.append(
+                ConversationMessage(
+                    user=user,
+                    content=message.content,
+                )
+            )
+        return Conversation(
+            namespace=namespace.ref,
+            title=namespace.title,
+            participants=await asyncio.gather(*[User.get(participant) for participant in namespace.participants]),
+            messages=messages_with_users,
+        )
+    
 class ChatRouter(APIRouter):
     def __init__(self, *args, **kwargs):
         super().__init__(prefix="/api", tags=["Chat"], *args, **kwargs)
@@ -78,3 +109,11 @@ class ChatRouter(APIRouter):
                 messages=namespace.messages + [instance.ref],  # type:ignore
             )
             return instance
+
+
+        @self.get("/namespace/fetch/{namespace}")
+        async def fetch_messages(namespace: str)->Conversation:
+            """Fetches messages from a namespace"""
+            return await Conversation(
+                namespace=namespace,
+            ).fetch()

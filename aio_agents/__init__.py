@@ -1,5 +1,6 @@
 import aiohttp_cors
 from aiofauna import *
+from aiohttp.web import HTTPFound, HTTPNotFound
 from aiohttp_sse import EventSourceResponse
 from boto3 import Session
 from dotenv import load_dotenv
@@ -19,10 +20,14 @@ load_dotenv()
 
 llm = LLMStack()
 s3 = Session().client("s3")
-app = APIServer(servers=[{"url": "https://api.aiofauna.com"}], client_max_size=2**22)
+app = APIServer(servers=[{"url": "https://www.aiofauna.com"}], client_max_size=2**22)
 
 
 def create_app():
+    @app.get("/")
+    async def index(request):
+        return Response(text=open("static/index.html").read(), content_type="text/html")
+
     @app.sse("/api/chat/{namespace}")
     async def chat_endpoint(text: str, namespace: str, sse: EventSourceResponse):
         async for response in llm.stream_chat_with_memory(text, namespace):
@@ -77,6 +82,15 @@ def create_app():
 
         return Response(body=generator(), headers={"Content-Type": "audio/mpeg"})
 
+    @app.get("/api/functions")
+    async def functions(request):
+        return [i.openaischema for i in FunctionDocument.Metadata.subclasses]
+
+    app.use(ChatRouter()).use(LoadRouter()).use(PaymentsRouter())
+
+    app.router.add_static("/", "static")
+
+
     cors = aiohttp_cors.setup(
         app,
         defaults={
@@ -89,9 +103,8 @@ def create_app():
         },
     )
 
-    app.use(ChatRouter()).use(LoadRouter())
-
     for route in list(app.router.routes()):
         cors.add(route)
+        
 
     return app

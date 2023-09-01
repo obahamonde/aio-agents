@@ -5,18 +5,18 @@ from aiofauna import *
 from .typedefs import *
 
 
-class ChatMessage(Document):
+class Message(Document):
     role: Role = Field(..., description="The role of the message")
     content: str = Field(..., description="The content of the message")
 
 
 class ChatCompletionRequest(Document):
     model: Model = Field(..., description="The model to use for the completion")
-    messages: List[ChatMessage] = Field(
+    messages: List[Message] = Field(
         ..., description="The messages to use for the completion"
     )
     temperature: float = Field(
-        default=0.2, description="The temperature of the completion"
+        default=0.5, description="The temperature of the completion"
     )
     max_tokens: int = Field(
         1024, description="The maximum number of tokens to generate"
@@ -34,7 +34,7 @@ class ChatCompletionUssage(Document):
 
 class ChatCompletionChoice(Document):
     index: int = Field(..., description="The index of the choice")
-    message: ChatMessage = Field(..., description="The message of the choice")
+    message: Message = Field(..., description="The message of the choice")
     finish_reason: str = Field(..., description="The reason the choice was finished")
 
 

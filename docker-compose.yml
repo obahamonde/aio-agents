@@ -1,9 +1,11 @@
+version: '3'
 services:
   api:
     image: aiofauna
     env_file:
       - .env
-    ports:
-      - 5000:5000
     volumes:
       - .:/app
+      - /var/lib/nginx:/var/lib/nginx
+      - /usr/sbin/nginx:/usr/sbin/nginx  # Mount Nginx binary
+    network_mode: host

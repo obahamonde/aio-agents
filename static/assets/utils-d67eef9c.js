@@ -1,0 +1,1 @@
+const n=()=>({useTypeWriter:e=>{for(let o=0;o<e.value.length;o++)setTimeout(()=>{e.value+=e.value[o]},100*o)},useCopy:e=>{navigator.clipboard.writeText(e)},usePlay:e=>{new Audio(e).play()},useColor:()=>{const e="0123456789ABCDEF";let o="#";for(let t=0;t<6;t++)o+=e[Math.floor(Math.random()*16)];return o}});export{n as u};
